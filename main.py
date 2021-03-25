@@ -10,12 +10,12 @@ blue  		= (000, 000, 255)
 blueviolet 	= (138,  43, 226)
 crimson 	= (220,  20,  60)
 tomato		= (255,  99,  71)
-pink = (255,   192,   203 )
+pink 		= (255, 192, 203)
 
-TITLE = "Tic Tac Toe"
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 500
-BOARD_SIZE = 350
+TITLE = "Computer Graphics Project"
+WINDOW_WIDTH = 900
+WINDOW_HEIGHT = 800
+BOARD_SIZE = 620
 
 BOARD_CORNER_X = (WINDOW_WIDTH - BOARD_SIZE) / 2
 BOARD_CORNER_Y = (WINDOW_HEIGHT - BOARD_SIZE) / 2
@@ -25,10 +25,10 @@ WIN_LINE_WIDTH = 10
 BLOCK_MARGIN = 25
 SYMBOL_SIZE = BOARD_SIZE / 3 - 2 * BLOCK_MARGIN
 
-WINDOW_BG_COLOR = pink #blueviolet
-BLOCK_BG_COLOR = tomato #white
-COLOR_OF_X = red
-COLOR_OF_O = blue
+WINDOW_BG_COLOR = blueviolet
+BOARD_BG_COLOR = white
+COLOR_OF_POINT = red
+COLOR_OF_LINE = blue
 
 TIE_TEXT = "It's a tie."
 WIN_TEXT = lambda winner: f"{winner} has won!"
@@ -37,38 +37,11 @@ TEXT_Y = 50
 
 RESTART_TEXT = "RESTART"
 RESTART_TEXT_FONT_TUPLE = ('ariel', 32)
-RESTART_TEXT_Y = 500 - 50
+RESTART_TEXT_Y = WINDOW_HEIGHT - 50
 RESTART_TEXT_COLOR = white
 RESTART_TEXT_BUTTON_COLOR = crimson
 RESTART_TEXT_BUTTON_HOVER_COLOR = tomato
 BUTTON_MARGIN = 8
-
-
-class Symbols:
-	@classmethod
-	def symbol_X(cls):
-		some_surface = game.Surface((SYMBOL_SIZE, SYMBOL_SIZE))
-		some_surface.fill(BLOCK_BG_COLOR)
-		game.draw.line(some_surface, COLOR_OF_X, (0, 0), (SYMBOL_SIZE, SYMBOL_SIZE), 8)
-		game.draw.line(some_surface, COLOR_OF_X, (SYMBOL_SIZE, 0), (0, SYMBOL_SIZE), 8)
-		return some_surface
-
-	@classmethod
-	def symbol_O(cls):
-		some_surface = game.Surface((SYMBOL_SIZE, SYMBOL_SIZE))
-		some_surface.fill(BLOCK_BG_COLOR)
-		half_symbol_size = int(SYMBOL_SIZE / 2)
-		game.draw.circle(some_surface, COLOR_OF_O, (half_symbol_size, half_symbol_size), half_symbol_size, 8)
-		return some_surface
-
-	@classmethod
-	def draw_symbol(cls, screen, sym, pos):
-		if sym == 'X':
-			some_surface = cls.symbol_X()
-		elif sym == 'O':
-			some_surface = cls.symbol_O()
-		else: return
-		screen.blit(some_surface, pos)
 
 class MyGame:
 	symbols = ['X', 'O']
@@ -99,6 +72,15 @@ class MyGame:
 		self.screen.fill(WINDOW_BG_COLOR)
 		self.clock = game.time.Clock()
 
+		board_rect = game.Rect(BOARD_CORNER_X, BOARD_CORNER_Y, BOARD_SIZE, BOARD_SIZE)
+
+		self.board = {
+			'rect': board_rect,
+			'color': BOARD_BG_COLOR,
+		}
+
+		self.points = []
+
 		self.TEXT_FONT = game.font.SysFont(*TEXT_FONT_TUPLE)
 		self.RESTART_TEXT_FONT = game.font.SysFont(*RESTART_TEXT_FONT_TUPLE)
 		self.create_restart_button()
@@ -106,12 +88,11 @@ class MyGame:
 	def play(self):
 		while True:
 			self.draw_board()
-			self.draw_blocks()
+			self.draw_points()
+			self.draw_lines()
 			self.display_text()
 			self.draw_restart_button()
 			self.handle_events()
-			if self.game_status == 1:
-				self.draw_win_line()
 
 			self.clock.tick(FPS)
 			game.display.update()
@@ -119,14 +100,7 @@ class MyGame:
 	def register_move(self, mouse_position):
 		self.just_updated = self.update_blocks(mouse_position)
 	
-		if self.just_updated:
-			if self.has_been_won():
-				self.game_status = 1
-			elif self.nf_symbols_on_board == 3 * 3:
-				self.game_status = 2
-			else:
-				self.turn = not self.turn
-			#print(self.grid)	
+		if self.just_updated: pass
 
 	def handle_events(self):
 		self.just_updated = False	
@@ -147,7 +121,10 @@ class MyGame:
 				# When the user clicks on a block
 				if self.restart_button['button_rect'].collidepoint(event.pos):
 					self.restart_button['callback']()
-				
+		
+				elif self.board['rect'].collidepoint(event.pos):
+					self.points.append(event.pos)
+
 				elif self.game_status == 0:
 					self.register_move(event.pos)
 				
@@ -155,29 +132,16 @@ class MyGame:
 	def draw_board(self):
 		# Draws the # board itself without filling in anything
 		board = game.Rect(BOARD_CORNER_XY, (BOARD_SIZE, BOARD_SIZE))
-		game.draw.rect(self.screen, BLOCK_BG_COLOR, board)
+		game.draw.rect(self.screen, BOARD_BG_COLOR, board)
 
-		vertical_line_one_x = BOARD_CORNER_X + BOARD_SIZE / 3
-		vertical_line_two_x = BOARD_CORNER_X + 2 * BOARD_SIZE / 3
-		horizontal_line_one_y = BOARD_CORNER_Y + BOARD_SIZE / 3
-		horizontal_line_two_y = BOARD_CORNER_Y + 2 * BOARD_SIZE / 3
+	def draw_points(self):
+		for pt in self.points:
+			game.draw.circle(self.screen, COLOR_OF_POINT, pt, 3, width=5)
 
-		vertical_line = lambda x: (
-						(x, BOARD_CORNER_Y), 
-						(x, BOARD_CORNER_Y + BOARD_SIZE)
-					)
-		horizontal_line = lambda y: (
-						(BOARD_CORNER_X, y), 
-						(BOARD_CORNER_X + BOARD_SIZE, y)
-					)
-
-		my_four_lines = [vertical_line(vertical_line_one_x),
-						 vertical_line(vertical_line_two_x),
-						 horizontal_line(horizontal_line_one_y), 
-						 horizontal_line(horizontal_line_two_y)]
-
-		for line_start, line_stop in my_four_lines:
-			game.draw.line(self.screen, WINDOW_BG_COLOR, line_start, line_stop, LINE_WIDTH)
+	def draw_lines(self):
+		for pt1 in self.points:
+			for pt2 in self.points:
+				game.draw.aaline(self.screen, COLOR_OF_LINE, pt1, pt2)
 
 	def display_text(self):
 		if self.game_status == 1:
@@ -237,121 +201,14 @@ class MyGame:
 
 				# If user clicked on this block
 				if box_rect.collidepoint(mouse_position):
-
-					if self.grid[i][j] == "": 
-					# There is no symbol in this block
-				
-						self.grid[i][j] = self.symbols[self.turn]
-						self.nf_symbols_on_board += 1
-						valid_update = True
-						break
-
-					else: # There is already a symbol in this block
-						valid_update = False
-						break
+					self.grid[i][j] = self.symbols[self.turn]
+					self.nf_symbols_on_board += 1
+					valid_update = True
+					break
 
 		return valid_update
 
 
-	def has_been_won(self):
-		row_win = lambda i: (
-			self.grid[i][0] == self.grid[i][1] == self.grid[i][2] != ""
-			)
-		col_win = lambda i: (
-			self.grid[0][i] == self.grid[1][i] == self.grid[2][i] != ""
-			)
-		left_diag_win = lambda: (
-			self.grid[0][0] == self.grid[1][1] == self.grid[2][2] != ""
-			)
-		right_diag_win = lambda: (
-			self.grid[0][2] == self.grid[1][1] == self.grid[2][0] != ""
-			)
-
-		for i in range(3):
-		
-			if row_win(i):
-				self.win_line = ("row", i)
-				return True
-		
-			elif col_win(i):
-				self.win_line = ("col", i)
-				return True
-		
-		if left_diag_win():
-			self.win_line = ("ldiag",)
-			return True
-		
-		elif right_diag_win():
-			self.win_line = ("rdiag",)
-			return True
-		
-		return False
-
-	def draw_win_line(self):
-		assert self.win_line is not None
-		#print(self.win_line)
-
-		box_size = BOARD_SIZE / 3
-
-		if self.win_line[0] == "col":
-			i = self.win_line[1]
-			
-			start_pos = (
-				BOARD_CORNER_X + (i + 0.5) * box_size, 
-				BOARD_CORNER_Y
-				)
-			end_pos = (
-				start_pos[0], 
-				start_pos[1] + BOARD_SIZE
-				)
-
-		elif self.win_line[0] == "row":
-			i = self.win_line[1]
-			
-			start_pos = (
-				BOARD_CORNER_X, 
-				BOARD_CORNER_Y + (i + 0.5) * box_size, 
-				)
-			end_pos = (
-				start_pos[0] + BOARD_SIZE, 
-				start_pos[1], 
-				)
-
-		elif self.win_line[0] == "ldiag":
-			
-			start_pos = (
-				BOARD_CORNER_X, 
-				BOARD_CORNER_Y,
-				)
-			end_pos = (
-				BOARD_CORNER_X + BOARD_SIZE, 
-				BOARD_CORNER_Y + BOARD_SIZE, 
-				)
-
-		elif self.win_line[0] == "rdiag":
-			
-			start_pos = (
-				BOARD_CORNER_X + BOARD_SIZE, 
-				BOARD_CORNER_Y,
-				)
-			end_pos = (
-				BOARD_CORNER_X, 
-				BOARD_CORNER_Y + BOARD_SIZE, 
-				)
-
-		game.draw.line(self.screen, black, start_pos, end_pos, WIN_LINE_WIDTH)
-
-
-	def draw_blocks(self):
-
-		box_size = BOARD_SIZE / 3
-	
-		for i in range(3):
-			for j in range(3):
-				left = BOARD_CORNER_X + j * box_size + BLOCK_MARGIN
-				top = BOARD_CORNER_Y + i * box_size + BLOCK_MARGIN
-				pos = (left, top)
-				Symbols.draw_symbol(self.screen, self.grid[i][j], pos)
 
 if __name__ == "__main__":
 	MyGame().play()
