@@ -2,11 +2,15 @@ import pygame as game
 from pygame.locals import *
 import sys
 
+import numpy as np
+
 FPS = 20
 black 		= (000, 000, 000)
 white 		= (255, 255, 255)
+fafafa 		= (250, 250, 250)
 red   		= (255, 000, 000)
 blue  		= (000, 000, 255)
+yellow 		= (255, 255, 000)
 blueviolet 	= (138,  43, 226)
 crimson 	= (220,  20,  60)
 tomato		= (255,  99,  71)
@@ -26,14 +30,11 @@ BLOCK_MARGIN = 25
 SYMBOL_SIZE = BOARD_SIZE / 3 - 2 * BLOCK_MARGIN
 
 WINDOW_BG_COLOR = blueviolet
-BOARD_BG_COLOR = white
+BOARD_BG_COLOR = fafafa
 COLOR_OF_POINT = red
 COLOR_OF_LINE = blue
 
-TIE_TEXT = "It's a tie."
-WIN_TEXT = lambda winner: f"{winner} has won!"
 TEXT_FONT_TUPLE = ('Cambria', 40)
-TEXT_Y = 50
 
 RESTART_TEXT = "RESTART"
 RESTART_TEXT_FONT_TUPLE = ('ariel', 32)
@@ -47,25 +48,6 @@ class MyGame:
 	symbols = ['X', 'O']
 
 	def __init__(self):
-		# Each cell of grid contains "", "X", or "O"
-		# It looks exactly like the tic tac toe board
-		self.grid = [["" for j in range(3)] for i in range(3)]
-
-		# Whose turn is it now? False -> "X", True -> "O"
-		self.turn = False 
-
-		# Boolean signifying whether move has just been made
-		self.just_updated = False # Not being used in multiple methods right now
-
-		# Game status. 0 -> Playing 1 -> Over with Win 2 -> Over with Tie
-		self.game_status = 0
-
-		# Information about location of win
-		self.win_line = None
-
-		# No. of symbols on the board
-		self.nf_symbols_on_board = 0
-
 		game.init()
 		self.screen = game.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 		game.display.set_caption(TITLE)
@@ -87,20 +69,16 @@ class MyGame:
 
 	def play(self):
 		while True:
+			self.screen.fill(WINDOW_BG_COLOR)
 			self.draw_board()
-			self.draw_points()
 			self.draw_lines()
-			self.display_text()
+			self.draw_points()
+			# self.display_text()
 			self.draw_restart_button()
 			self.handle_events()
 
 			self.clock.tick(FPS)
 			game.display.update()
-
-	def register_move(self, mouse_position):
-		self.just_updated = self.update_blocks(mouse_position)
-	
-		if self.just_updated: pass
 
 	def handle_events(self):
 		self.just_updated = False	
@@ -110,7 +88,6 @@ class MyGame:
 				sys.exit()
 
 			elif event.type == game.MOUSEMOTION:
-				# When the user clicks on a block
 				if self.restart_button['button_rect'].collidepoint(event.pos):
 					self.restart_button['color'] = RESTART_TEXT_BUTTON_HOVER_COLOR
 				else:
@@ -118,15 +95,11 @@ class MyGame:
 
 
 			elif event.type == game.MOUSEBUTTONDOWN:
-				# When the user clicks on a block
 				if self.restart_button['button_rect'].collidepoint(event.pos):
 					self.restart_button['callback']()
 		
 				elif self.board['rect'].collidepoint(event.pos):
 					self.points.append(event.pos)
-
-				elif self.game_status == 0:
-					self.register_move(event.pos)
 				
 				
 	def draw_board(self):
@@ -136,23 +109,54 @@ class MyGame:
 
 	def draw_points(self):
 		for pt in self.points:
-			game.draw.circle(self.screen, COLOR_OF_POINT, pt, 3, width=5)
+			game.draw.circle(self.screen, COLOR_OF_POINT, pt, 6, width=5)
 
 	def draw_lines(self):
-		for pt1 in self.points:
-			for pt2 in self.points:
-				game.draw.aaline(self.screen, COLOR_OF_LINE, pt1, pt2)
+		# for pt1 in self.points:
+		# 	for pt2 in self.points:
+		# 		game.draw.aaline(self.screen, COLOR_OF_LINE, pt1, pt2)
 
-	def display_text(self):
-		if self.game_status == 1:
-			text_to_print = WIN_TEXT(self.symbols[self.turn])
-		elif self.game_status == 2:
-			text_to_print = TIE_TEXT
-		else: return
+		k = len(self.points) - 1
 
-		text = self.TEXT_FONT.render(text_to_print, True, black)
-		text_rect = text.get_rect(center = (WINDOW_WIDTH // 2, TEXT_Y))
-		self.screen.blit(text, text_rect)
+		def lj_of_x(j, x):
+			ret = 1
+
+			for m in range(0, k + 1):
+				xm = self.points[m][0]
+				xj = self.points[j][0]
+
+				if m != j:
+					ret *= (x - xm)/(xj - xm)
+
+			return ret
+
+		def L(x):
+			summ = 0
+			for j in range(0, k + 1):
+				yj = self.points[j][1]
+				summ += yj * lj_of_x(j, x)
+			return summ
+
+		if len(self.points):
+			xmin = min(self.points, key=lambda pt: pt[0])[0]
+			xmax = max(self.points, key=lambda pt: pt[0])[0]
+
+			for xi in np.arange(xmin, xmax + 1, 0.1):
+				game.draw.circle(self.screen, yellow, (xi, L(xi)), 3, width=5)
+				# print(xi, lag_poly(xi))
+
+
+
+	# def display_text(self):
+	# 	if self.game_status == 1:
+	# 		text_to_print = WIN_TEXT(self.symbols[self.turn])
+	# 	elif self.game_status == 2:
+	# 		text_to_print = TIE_TEXT
+	# 	else: return
+
+	# 	text = self.TEXT_FONT.render(text_to_print, True, black)
+	# 	text_rect = text.get_rect(center = (WINDOW_WIDTH // 2, TEXT_Y))
+	# 	self.screen.blit(text, text_rect)
 
 	def create_restart_button(self):
 		button_color = RESTART_TEXT_BUTTON_COLOR

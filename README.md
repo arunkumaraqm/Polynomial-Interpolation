@@ -4,5 +4,6 @@
 > To the Layman: Draws Curves Connecting Points
 
 ## Contributors
-Arun Kumar 
-Ananth Desai
+
+- Arun Kumar 
+- Ananth Desai
