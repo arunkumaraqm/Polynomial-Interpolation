@@ -23,6 +23,9 @@ colors.update({
 	'pink': 		(255, 192, 203),
 })
 
+# mode names and point and line colours
+ALL_MODES = ['lagrange', 'bezier', 'hermite']
+
 # window details
 WINDOW_TITLE = "Computer Graphics Project"
 WINDOW_WIDTH = 900
@@ -33,13 +36,17 @@ BOARD_SIZE = 620
 BOARD_CORNER_X = (WINDOW_WIDTH - BOARD_SIZE) / 2
 BOARD_CORNER_Y = (WINDOW_HEIGHT - BOARD_SIZE) / 2
 BOARD_CORNER_XY = (BOARD_CORNER_X, BOARD_CORNER_Y)
-LINE_WIDTH = 5
-WIN_LINE_WIDTH = 10
-BLOCK_MARGIN = 25
 
 # colour details
 WINDOW_BG_COLOR = colors['blueviolet']
 BOARD_BG_COLOR = colors['fafafa']
+COLOR_OF_POINT = colors['medium_red_violet']
+MODE_LINE_COLOR_MAP = {
+	'connected':		colors['raspberry'],
+	'lagrange': 		colors['yellow'],
+	'bezier':			colors['green_yellow'],
+	'hermite':			colors['mauve'],
+} # given mode, what should be the colour of the curve?
 
 # text details
 TEXT_FONT_TUPLE = ('Cambria', 40)
@@ -53,4 +60,17 @@ RESTART_TEXT_BUTTON_COLOR = colors['crimson']
 RESTART_TEXT_BUTTON_HOVER_COLOR = colors['tomato']
 BUTTON_MARGIN = 8
 
+# mode button details
+MODE_TEXT_FONT_TUPLE = ('ariel', 32)
 MODE_TEXT_Y = 50
+MODE_BUTTON_TEXT_COLOR_MAP = {
+	'connected': 		colors['sap_green'],
+	'lagrange': 		colors['red'],
+	'bezier':			colors['medium_red_violet'],
+	'hermite':			colors['honolulu_blue'],
+}
+MODE_BUTTON_BG_COLOR_MAP = MODE_LINE_COLOR_MAP # given mode, what should be the background colour of this mode's button?
+
+# to add
+# point radius and point width for points and points constituting lines
+
