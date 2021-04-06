@@ -1,6 +1,7 @@
 FPS = 20 # frames per second
 
 import pandas as pd
+import pygame as game
 
 cdf = pd.read_csv('colors.csv')
 
@@ -28,11 +29,12 @@ ALL_MODES = ['lagrange', 'bezier', 'hermite']
 
 # window details
 WINDOW_TITLE = "Computer Graphics Project"
-WINDOW_WIDTH = 900
-WINDOW_HEIGHT = 800
+WINDOW_WIDTH = 700
+WINDOW_HEIGHT = 650
 
 # board details
-BOARD_SIZE = 620
+BOARD_SIZE = 500
+INNER_BOARD_SIZE = 480
 BOARD_CORNER_X = (WINDOW_WIDTH - BOARD_SIZE) / 2
 BOARD_CORNER_Y = (WINDOW_HEIGHT - BOARD_SIZE) / 2
 BOARD_CORNER_XY = (BOARD_CORNER_X, BOARD_CORNER_Y)
@@ -69,6 +71,22 @@ MODE_BUTTON_TEXT_COLOR_MAP = {
 	'bezier':			colors['medium_red_violet'],
 	'hermite':			colors['honolulu_blue'],
 }
+# text color changes on hover
+MODE_BUTTON_HOVER_TEXT_COLOR_MAP = {
+	'connected':		colors['raspberry'],
+	'lagrange': 		colors['yellow'],
+	'bezier':			colors['green_yellow'],
+	'hermite':			colors['mauve'],
+}
+
+# button bg color changes on hover
+MODE_BUTTON_HOVER_BG_COLOR_MAP = {
+	'connected': 		colors['sap_green'],
+	'lagrange': 		colors['red'],
+	'bezier':			colors['medium_red_violet'],
+	'hermite':			colors['honolulu_blue'],
+}
+
 MODE_BUTTON_BG_COLOR_MAP = MODE_LINE_COLOR_MAP # given mode, what should be the background colour of this mode's button?
 
 # to add
