@@ -6,196 +6,210 @@ from collections import defaultdict
 from constants import *
 from numerical_methods import NumericalMethods
 
+
 class MyGame:
-	def __init__(self):
-		game.init()
-		self.screen = game.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-		game.display.set_caption(WINDOW_TITLE)
-		self.screen.fill(WINDOW_BG_COLOR)
-		self.clock = game.time.Clock()
+    def __init__(self):
+        game.init()
+        self.screen = game.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        game.display.set_caption(WINDOW_TITLE)
+        self.screen.fill(WINDOW_BG_COLOR)
+        self.clock = game.time.Clock()
 
-		# initializing fonts
-		self.TEXT_FONT = game.font.SysFont(*TEXT_FONT_TUPLE) # not used for now
-		self.RESTART_TEXT_FONT = game.font.SysFont(*RESTART_TEXT_FONT_TUPLE)
-		self.MODE_TEXT_FONT = game.font.SysFont(*MODE_TEXT_FONT_TUPLE)
+        # initializing fonts
+        self.TEXT_FONT = game.font.SysFont(*TEXT_FONT_TUPLE)  # not used for now
+        self.RESTART_TEXT_FONT = game.font.SysFont(*RESTART_TEXT_FONT_TUPLE)
+        self.MODE_TEXT_FONT = game.font.SysFont(*MODE_TEXT_FONT_TUPLE)
 
-		self.mode_buttons = defaultdict(dict)
-		self.create_restart_button()
-		self.create_mode_buttons()
+        self.mode_buttons = defaultdict(dict)
+        self.create_restart_button()
+        self.create_mode_buttons()
 
-		board_rect = game.Rect(BOARD_CORNER_X, BOARD_CORNER_Y, BOARD_SIZE, BOARD_SIZE)
-		self.board = {
-			'rect': board_rect,
-			'color': BOARD_BG_COLOR,
-		}
+        board_rect = game.Rect(BOARD_CORNER_X, BOARD_CORNER_Y, BOARD_SIZE, BOARD_SIZE)
+        inner_board_rect = game.Rect((BOARD_CORNER_X + 5), (BOARD_CORNER_Y + 5), INNER_BOARD_SIZE, INNER_BOARD_SIZE)
+        self.board = {
+            'rect': board_rect,
+            'color': BOARD_BG_COLOR,
+        }
+        self.inner_board = {
+            'rect': inner_board_rect,
+            'color': WINDOW_BG_COLOR,
+        }
 
-		self.something_happened = True	
+        self.something_happened = True
 
-		# important state variables 
-		self.points = []
-		self.points_constituting_line = defaultdict(list)
-		self.modes = set(['lagrange'])
+        # important state variables
+        self.points = []
+        self.points_constituting_line = defaultdict(list)
+        self.modes = set(['lagrange'])
 
-	def play(self):
-		while True:
-			# there is no need to calculate what pixels to fill 
-			# if most of the window remains unchanged
-			if self.something_happened: 
-				self.screen.fill(WINDOW_BG_COLOR)
-				self.draw_board()
-				self.draw_lines()
-				self.draw_points()
-				# self.display_text()
+    def play(self):
+        while True:
+            # there is no need to calculate what pixels to fill
+            # if most of the window remains unchanged
+            if self.something_happened:
+                self.screen.fill(WINDOW_BG_COLOR)
+                self.draw_board()
+                self.draw_lines()
+                self.draw_points()
+            # self.display_text()
 
-			# drawing buttons
-			self.draw_button(self.restart_button)
-			for mode in ALL_MODES: 
-				self.draw_button(self.mode_buttons[mode])
+            # drawing buttons
+            self.draw_button(self.restart_button)
+            for mode in ALL_MODES:
+                self.draw_button(self.mode_buttons[mode])
 
-			self.handle_events()
-			self.clock.tick(FPS)
-			game.display.update()
+            self.handle_events()
+            self.clock.tick(FPS)
+            game.display.update()
 
-	def handle_events(self):
-		self.something_happened = False	
+    def handle_events(self):
+        self.something_happened = False
 
-		for event in game.event.get():
+        for event in game.event.get():
 
-			# when X is pressed
-			if event.type == QUIT:
-				game.quit()
-				sys.exit()
+            # when X is pressed
+            if event.type == QUIT:
+                game.quit()
+                sys.exit()
 
-			# when the mouse moves across the window
-			elif event.type == game.MOUSEMOTION:
-				if self.restart_button['button_rect'].collidepoint(event.pos):
-					self.restart_button['color'] = RESTART_TEXT_BUTTON_HOVER_COLOR
-				else:
-					self.restart_button['color'] = RESTART_TEXT_BUTTON_COLOR
+            # when the mouse moves across the window
+            elif event.type == game.MOUSEMOTION:
+                if self.restart_button['button_rect'].collidepoint(event.pos):
+                    self.restart_button['color'] = RESTART_TEXT_BUTTON_HOVER_COLOR
+                else:
+                    self.restart_button['color'] = RESTART_TEXT_BUTTON_COLOR
+
+                # mode buttons' hover changes
+                for mode in ALL_MODES:
+                    if self.mode_buttons[mode]['button_rect'].collidepoint(event.pos):
+                        self.mode_buttons[mode]['color'] = MODE_BUTTON_HOVER_BG_COLOR_MAP[mode]
+                        self.mode_buttons[mode]['text'] = self.MODE_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_HOVER_TEXT_COLOR_MAP[mode])
+                    else:
+                        self.mode_buttons[mode]['color'] = MODE_BUTTON_BG_COLOR_MAP[mode]
+                        self.mode_buttons[mode]['text'] = self.MODE_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
 
 
-			# when the mouse is clicked but not released
-			# the 'not released' part is irrelevant to us
-			elif event.type == game.MOUSEBUTTONDOWN:
-				self.something_happened = True
+            # when the mouse is clicked but not released
+            # the 'not released' part is irrelevant to us
+            elif event.type == game.MOUSEBUTTONDOWN:
+                self.something_happened = True
 
-				# if restart button is clicked, call its callback function
-				if self.restart_button['button_rect'].collidepoint(event.pos):
-					self.restart_button['callback']()
-		
-				# if board is clicked, add a point there
-				elif self.board['rect'].collidepoint(event.pos):
-					self.points.append(event.pos)
+                # if restart button is clicked, call its callback function
+                if self.restart_button['button_rect'].collidepoint(event.pos):
+                    self.restart_button['callback']()
 
-				# user is modifying active modes
-				else:
-					for mode in ALL_MODES:
-						if self.mode_buttons[mode]['button_rect'].collidepoint(event.pos):
-							if mode in self.modes:
-								self.modes.discard(mode)
-							else:
-								self.modes.add(mode)
-				
-				
-	def draw_board(self):
-		# Draws the board itself without filling in anything
-		board = game.Rect(BOARD_CORNER_XY, (BOARD_SIZE, BOARD_SIZE))
-		game.draw.rect(self.screen, self.board['color'], board)
+                # if board is clicked, add a point there
+                elif self.inner_board['rect'].collidepoint(event.pos):
+                    self.points.append(event.pos)
 
-	def draw_points(self):
-		color_of_point = COLOR_OF_POINT
-		for pt in self.points:
-			game.draw.circle(self.screen, color_of_point, pt, 6, width=5)
+                # user is modifying active modes
+                else:
+                    for mode in ALL_MODES:
+                        if self.mode_buttons[mode]['button_rect'].collidepoint(event.pos):
+                            if mode in self.modes:
+                                self.modes.discard(mode)
+                            else:
+                                self.modes.add(mode)
 
-	def draw_lines(self):
-		for mode in self.modes:
-			# calling the correct numerical method to get points constituting the curve
-			self.points_constituting_line[mode] = getattr(NumericalMethods, mode)(self.points)
-			# filter out parts of curve lying outside board
-			self.points_constituting_line[mode] = [
-				pt for pt in self.points_constituting_line[mode] 
-				if self.board['rect'].collidepoint(pt)
-			]
+    def draw_board(self):
+        # Draws the board itself without filling in anything
+        board = game.Rect(BOARD_CORNER_XY, (BOARD_SIZE, BOARD_SIZE))
+        game.draw.rect(self.screen, self.board['color'], board)
 
-		for mode in self.modes:
-			color_of_line = MODE_LINE_COLOR_MAP[mode]
-			for pt in self.points_constituting_line[mode]:
-				game.draw.circle(self.screen, color_of_line, pt, 3, width=5)
+    def draw_points(self):
+        color_of_point = COLOR_OF_POINT
+        for pt in self.points:
+            game.draw.circle(self.screen, color_of_point, pt, 6, width=5)
 
-		# issue: board needs a margin. the point which is part of the curve at the boundary leaks out
+    def draw_lines(self):
+        for mode in self.modes:
+            # calling the correct numerical method to get points constituting the curve
+            self.points_constituting_line[mode] = getattr(NumericalMethods, mode)(self.points)
+            # filter out parts of curve lying outside board
+            self.points_constituting_line[mode] = [
+                pt for pt in self.points_constituting_line[mode]
+                if self.inner_board['rect'].collidepoint(pt)
+            ]
 
-	def connected(self):
-		""" This function is not used anywhere. """
-		for pt1 in self.points:
-			for pt2 in self.points:
-				game.draw.aaline(self.screen, MODE_LINE_COLOR_MAP[self.mode], pt1, pt2)
+        for mode in self.modes:
+            color_of_line = MODE_LINE_COLOR_MAP[mode]
+            for pt in self.points_constituting_line[mode]:
+                game.draw.circle(self.screen, color_of_line, pt, 3, width=5)
 
-	# def display_text(self):
-	# 	if self.game_status == 1:
-	# 		text_to_print = WIN_TEXT(self.symbols[self.turn])
-	# 	elif self.game_status == 2:
-	# 		text_to_print = TIE_TEXT
-	# 	else: return
-	# 
-	# 	text = self.TEXT_FONT.render(text_to_print, True, black)
-	# 	text_rect = text.get_rect(center = (WINDOW_WIDTH // 2, TEXT_Y))
-	# 	self.screen.blit(text, text_rect)
+    # issue: board needs a margin. the point which is part of the curve at the boundary leaks out
 
-	def create_restart_button(self):
-		button_color = RESTART_TEXT_BUTTON_COLOR
-		center = (WINDOW_WIDTH // 2, RESTART_TEXT_Y)
-		margin = BUTTON_MARGIN
+    def connected(self):
+        """ This function is not used anywhere. """
+        for pt1 in self.points:
+            for pt2 in self.points:
+                game.draw.aaline(self.screen, MODE_LINE_COLOR_MAP[self.mode], pt1, pt2)
 
-		text = self.RESTART_TEXT_FONT.render(RESTART_TEXT, True, RESTART_TEXT_COLOR)
-		text_rect = text.get_rect(center = center)
+    # def display_text(self):
+    # 	if self.game_status == 1:
+    # 		text_to_print = WIN_TEXT(self.symbols[self.turn])
+    # 	elif self.game_status == 2:
+    # 		text_to_print = TIE_TEXT
+    # 	else: return
+    #
+    # 	text = self.TEXT_FONT.render(text_to_print, True, black)
+    # 	text_rect = text.get_rect(center = (WINDOW_WIDTH // 2, TEXT_Y))
+    # 	self.screen.blit(text, text_rect)
 
-		my_button_rect = game.Rect(
-			text_rect.x - margin, 
-			text_rect.y - margin,
-			text_rect.width + 2 * margin,
-			text_rect.height + 2 * margin,
-		)
-		self.restart_button = {
-			'text': text,
-			'text_rect': text_rect,
-			'button_rect': my_button_rect,
-			'color': button_color,
-			'callback': self.__init__
-		}
+    def create_restart_button(self):
+        button_color = RESTART_TEXT_BUTTON_COLOR
+        center = (WINDOW_WIDTH // 2, RESTART_TEXT_Y)
+        margin = BUTTON_MARGIN
 
-	def create_mode_buttons(self):
-		for i, mode in enumerate(ALL_MODES):
-			button_color = MODE_BUTTON_BG_COLOR_MAP[mode]
-			center = ((2*i+1) * (WINDOW_WIDTH // (2 * len(ALL_MODES))), MODE_TEXT_Y)
-			margin = BUTTON_MARGIN
+        text = self.RESTART_TEXT_FONT.render(RESTART_TEXT, True, RESTART_TEXT_COLOR)
+        text_rect = text.get_rect(center=center)
 
-			text = self.MODE_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
-			text_rect = text.get_rect(center = center)
+        my_button_rect = game.Rect(
+            text_rect.x - margin,
+            text_rect.y - margin,
+            text_rect.width + 2 * margin,
+            text_rect.height + 2 * margin,
+        )
+        self.restart_button = {
+            'text': text,
+            'text_rect': text_rect,
+            'button_rect': my_button_rect,
+            'color': button_color,
+            'callback': self.__init__
+        }
 
-			my_button_rect = game.Rect(
-				text_rect.x - margin, 
-				text_rect.y - margin,
-				text_rect.width + 2 * margin,
-				text_rect.height + 2 * margin,
-			)
+    def create_mode_buttons(self):
+        for i, mode in enumerate(ALL_MODES):
+            button_color = MODE_BUTTON_BG_COLOR_MAP[mode]
+            center = ((2 * i + 1) * (WINDOW_WIDTH // (2 * len(ALL_MODES))), MODE_TEXT_Y)
+            margin = BUTTON_MARGIN
 
-			self.mode_buttons[mode] = {
-				'text': text,
-				'text_rect': text_rect,
-				'button_rect': my_button_rect,
-				'color': button_color
-			}
+            text = self.MODE_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
+            text_rect = text.get_rect(center=center)
 
-	def draw_button(self, given_button):
-		game.draw.rect(
-			self.screen, 
-			given_button['color'], 
-			given_button['button_rect']
-		)
-		self.screen.blit(
-			given_button['text'],
-			given_button['text_rect'],
-		)
+            my_button_rect = game.Rect(
+                text_rect.x - margin,
+                text_rect.y - margin,
+                text_rect.width + 2 * margin,
+                text_rect.height + 2 * margin,
+            )
+
+            self.mode_buttons[mode] = {
+                'text': text,
+                'text_rect': text_rect,
+                'button_rect': my_button_rect,
+                'color': button_color
+            }
+
+    def draw_button(self, given_button):
+        game.draw.rect(
+            self.screen,
+            given_button['color'],
+            given_button['button_rect']
+        )
+        self.screen.blit(
+            given_button['text'],
+            given_button['text_rect'],
+        )
 
 if __name__ == "__main__":
-	MyGame().play()
+    MyGame().play()
