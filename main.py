@@ -40,7 +40,7 @@ class MyGame:
         # important state variables
         self.points = []
         self.points_constituting_line = defaultdict(list)
-        self.modes = set(['lagrange'])
+        self.modes = set(['bezier'])
 
     def play(self):
         while True:

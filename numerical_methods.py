@@ -1,7 +1,15 @@
 import numpy as np
 import math
+from math import factorial
 import pygame
+import functools
 
+
+# prolly wise to memoize
+def nCk(n, k):
+    numerator = factorial(n)
+    denominator = factorial(k) * factorial(n - k)
+    return numerator/denominator
 
 class NumericalMethods:
     @classmethod
@@ -35,28 +43,28 @@ class NumericalMethods:
         else:
             return []
 
-    # bezier and hermite are just lagrange with offsets for now
     @classmethod
     def bezier(cls, pts):
-        # mylist = cls.lagrange(pts)
-        # mylist = [(x, y + 15) for x, y in mylist]
-        # return mylist
+        # formula taken from hearn, baker, carithers pg 422/429
+                
+        points = np.array(pts)
 
-        k = len(pts) - 1
-        f_pts = []
+        def P(u):
+            summ = np.array([0, 0], dtype = 'float')
+            n = len(points) - 1
+            for k in range(0, n + 1):
+                prod = points[k] * nCk(n, k) * u ** k * (1-u) ** (n-k)
+                summ += prod
+            return summ
 
-        for n in np.arange(0, 1, 0.01):
-            pt = np.zeros(2)
-            for i in range(len(pts)):
-                pt += np.dot(
-                    (math.factorial(k) / (math.factorial(i) * math.factorial(k - i))) * ((1 - n) ** (k - i)) * (n ** i),
-                    pts[i])
-                f_pts.append((pt[0].astype(int), pt[1].astype(int)))
-        print(f_pts)
-        return f_pts
+        # calculating a 100 output points for the bezier curve
+        out_pts = []
+        for u in np.linspace(0, 1, 100):
+            out_pts.append(P(u))
+        return out_pts
 
     @classmethod
-    def hermite(cls, pts):
+    def hermite(cls, pts): # just an offset lagrange now
         mylist = cls.lagrange(pts)
         mylist = [(x, y - 15) for x, y in mylist]
         return mylist
