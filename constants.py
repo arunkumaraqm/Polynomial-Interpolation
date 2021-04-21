@@ -71,7 +71,8 @@ RESTART_TEXT_BUTTON_HOVER_COLOR = colors['tomato']
 BUTTON_MARGIN = 8
 
 # mode button details
-MODE_TEXT_FONT_TUPLE = ('ariel', 32)
+MODE_TEXT_FONT_TUPLE = ('ariel bold', 32)
+MODE_OFF_TEXT_FONT_TUPLE = ('ariel', 32)
 MODE_TEXT_Y = 50
 MODE_BUTTON_TEXT_COLOR_MAP = {
 	'connected': 		colors['sap_green'],
@@ -96,6 +97,9 @@ MODE_BUTTON_HOVER_BG_COLOR_MAP = {
 }
 
 MODE_BUTTON_BG_COLOR_MAP = MODE_LINE_COLOR_MAP # given mode, what should be the background colour of this mode's button?
+
+# MODE_INDICATOR_TEXT_FONT_TUPLE = ('ariel', 16)
+# MODE_INDICATOR_COLOR = colors['white']
 
 # to add
 # point radius and point width for points and points constituting lines

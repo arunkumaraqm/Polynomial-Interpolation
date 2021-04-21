@@ -16,14 +16,27 @@ class MyGame:
         self.screen.fill(WINDOW_BG_COLOR)
         self.clock = game.time.Clock()
 
+        self.modes = set(['bezier'])
+        self.something_happened = True
+
+        # important state variables
+        self.points = []
+        self.points_constituting_line = defaultdict(list)
+
         # initializing fonts
         self.TEXT_FONT = game.font.SysFont(*TEXT_FONT_TUPLE)  # not used for now
         self.RESTART_TEXT_FONT = game.font.SysFont(*RESTART_TEXT_FONT_TUPLE)
         self.MODE_TEXT_FONT = game.font.SysFont(*MODE_TEXT_FONT_TUPLE)
+        self.MODE_TEXT_FONT.set_underline(True)
+        self.MODE_OFF_TEXT_FONT = game.font.SysFont(*MODE_OFF_TEXT_FONT_TUPLE)
+        self.MODE_OFF_TEXT_FONT.set_underline(False)
+        # self.MODE_INDICATOR_TEXT_FONT = game.font.SysFont(*MODE_INDICATOR_TEXT_FONT_TUPLE)
 
         self.mode_buttons = defaultdict(dict)
+        self.mode_indicators = defaultdict(dict)
         self.create_restart_button()
         self.create_mode_buttons()
+        # self.create_mode_indicators()
 
         board_rect = game.Rect(BOARD_CORNER_X, BOARD_CORNER_Y, BOARD_SIZE, BOARD_SIZE)
         inner_board_rect = game.Rect((BOARD_CORNER_X + 5), (BOARD_CORNER_Y + 5), INNER_BOARD_SIZE, INNER_BOARD_SIZE)
@@ -36,12 +49,6 @@ class MyGame:
             'color': WINDOW_BG_COLOR,
         }
 
-        self.something_happened = True
-
-        # important state variables
-        self.points = []
-        self.points_constituting_line = defaultdict(list)
-        self.modes = set(['bezier'])
 
     def play(self):
         while True:
@@ -53,12 +60,15 @@ class MyGame:
                 self.draw_lines()
                 self.draw_points()
                 self.draw_control_graph()
+
             # self.display_text()
 
             # drawing buttons
             self.draw_button(self.restart_button)
+            self.create_mode_buttons()
             for mode in ALL_MODES:
                 self.draw_button(self.mode_buttons[mode])
+                # self.draw_button(self.mode_indicators[mode])
 
             self.handle_events()
             self.clock.tick(FPS)
@@ -232,7 +242,12 @@ class MyGame:
             center = ((2 * i + 1) * (WINDOW_WIDTH // (2 * len(ALL_MODES))), MODE_TEXT_Y)
             margin = BUTTON_MARGIN
 
-            text = self.MODE_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
+            buttonfont = self.MODE_TEXT_FONT if mode in self.modes else self.MODE_OFF_TEXT_FONT
+            text = buttonfont.render(
+                mode.upper(),
+                True, 
+                MODE_BUTTON_TEXT_COLOR_MAP[mode]
+            )
             text_rect = text.get_rect(center=center)
 
             my_button_rect = game.Rect(
@@ -248,6 +263,28 @@ class MyGame:
                 'button_rect': my_button_rect,
                 'color': button_color
             }
+    # def create_mode_indicators(self):
+    #     for i, mode in enumerate(ALL_MODES):
+    #         button_color = MODE_INDICATOR_COLOR
+    #         center = ((2 * i + 1) * (WINDOW_WIDTH // (2 * len(ALL_MODES))), MODE_TEXT_Y - 30)
+    #         margin = 1
+
+    #         text = self.MODE_INDICATOR_TEXT_FONT.render("on".upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
+    #         text_rect = text.get_rect(center=center)
+
+    #         my_button_rect = game.Rect(
+    #             text_rect.x - margin,
+    #             text_rect.y - margin,
+    #             text_rect.width + 2 * margin,
+    #             text_rect.height + 2 * margin,
+    #         )
+
+    #         self.mode_indicators[mode] = {
+    #             'text': text,
+    #             'text_rect': text_rect,
+    #             'button_rect': my_button_rect,
+    #             'color': button_color
+    #         }
 
     def draw_button(self, given_button):
         game.draw.rect(
