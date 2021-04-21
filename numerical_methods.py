@@ -16,6 +16,10 @@ class NumericalMethods:
     def lagrange(cls, pts):
         k = len(pts) - 1
 
+        # Lagrange polynomials are not defined when any two of the x coords over the set of points are the same
+        if len(set(pt[0] for pt in pts)) < len(pts):
+            raise ValueError('Lagrange polynomial cannot be defined.')
+
         def lj_of_x(j, x):
             ret = 1
 
@@ -24,7 +28,8 @@ class NumericalMethods:
                 xj = pts[j][0]
 
                 if m != j:
-                    ret *= (x - xm) / (xj - xm)  # fix divide by zero
+                    denom = xj - xm
+                    ret *= (x - xm) / denom 
 
             return ret
 

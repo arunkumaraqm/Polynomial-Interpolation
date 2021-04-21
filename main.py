@@ -171,13 +171,16 @@ class MyGame:
 
     def draw_lines(self):
         for mode in self.modes:
-            # calling the correct numerical method to get points constituting the curve
-            self.points_constituting_line[mode] = getattr(NumericalMethods, mode)(self.points)
-            # filter out parts of curve lying outside board
-            self.points_constituting_line[mode] = [
-                pt for pt in self.points_constituting_line[mode]
-                if self.inner_board['rect'].collidepoint(pt)
-            ]
+            try:
+                # calling the correct numerical method to get points constituting the curve
+                self.points_constituting_line[mode] = getattr(NumericalMethods, mode)(self.points)
+                # filter out parts of curve lying outside board
+                self.points_constituting_line[mode] = [
+                    pt for pt in self.points_constituting_line[mode]
+                    if self.inner_board['rect'].collidepoint(pt)
+                ]
+            except ValueError as er:
+                print("Error: ", str(er))
 
         for mode in self.modes:
             color_of_line = MODE_LINE_COLOR_MAP[mode]
