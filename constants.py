@@ -50,6 +50,14 @@ MODE_LINE_COLOR_MAP = {
 	'hermite':			colors['mauve'],
 } # given mode, what should be the colour of the curve?
 
+CONTROL_GRAPH_REQUIRED = {
+	'connected':	False,
+	'lagrange':		False,
+	'bezier':		True,
+	'hermite':		True,
+}
+MODES_NEEDING_CONTROL_GRAPH = set(key for key, value in CONTROL_GRAPH_REQUIRED.items() if value is True)
+
 # text details
 TEXT_FONT_TUPLE = ('Cambria', 40)
 
@@ -91,4 +99,6 @@ MODE_BUTTON_BG_COLOR_MAP = MODE_LINE_COLOR_MAP # given mode, what should be the 
 
 # to add
 # point radius and point width for points and points constituting lines
+
+COLOR_OF_CONTROL_GRAPH = colors['fluorescent_pink']
 

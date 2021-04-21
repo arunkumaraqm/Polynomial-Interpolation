@@ -2,6 +2,7 @@ import pygame as game
 from pygame.locals import *
 import sys
 from collections import defaultdict
+import numpy as np
 
 from constants import *
 from numerical_methods import NumericalMethods
@@ -51,6 +52,7 @@ class MyGame:
                 self.draw_board()
                 self.draw_lines()
                 self.draw_points()
+                self.draw_control_graph()
             # self.display_text()
 
             # drawing buttons
@@ -121,6 +123,52 @@ class MyGame:
         for pt in self.points:
             game.draw.circle(self.screen, color_of_point, pt, 6, width=5)
 
+    def draw_line_dashed(
+        self, 
+        color, 
+        start_pos, 
+        end_pos, 
+        width=1, 
+        dash_length=10, 
+        exclude_corners=True
+    ):
+        # taken from https://codereview.stackexchange.com/a/248823/233032
+
+        # convert tuples to numpy arrays
+        start_pos = np.array(start_pos)
+        end_pos   = np.array(end_pos)
+
+        # get euclidian distance between start_pos and end_pos
+        length = np.linalg.norm(end_pos - start_pos)
+
+        # get amount of pieces that line will be split up in (half of it are amount of dashes)
+        dash_amount = int(length / dash_length)
+
+        # x-y-value-pairs of where dashes start (and on next, will end)
+        dash_knots = np.array([np.linspace(start_pos[i], end_pos[i], dash_amount) for i in range(2)]).transpose()
+
+        exclude_corners = int(exclude_corners)
+        for n in range(exclude_corners, dash_amount - exclude_corners, 2):
+            game.draw.line(
+                self.screen, 
+                color, 
+                tuple(dash_knots[n]), 
+                tuple(dash_knots[n+1]), 
+                width
+            )
+
+
+    def draw_control_graph(self):
+        if len(self.modes) != 0 and self.modes.isdisjoint(MODES_NEEDING_CONTROL_GRAPH):
+            return
+        if len(self.points) > 2:
+            for first, second in zip(self.points[:-1], self.points[1:]):
+                self.draw_line_dashed(
+                    COLOR_OF_CONTROL_GRAPH, 
+                    first, 
+                    second
+                )
+
     def draw_lines(self):
         for mode in self.modes:
             # calling the correct numerical method to get points constituting the curve
@@ -135,8 +183,6 @@ class MyGame:
             color_of_line = MODE_LINE_COLOR_MAP[mode]
             for pt in self.points_constituting_line[mode]:
                 game.draw.circle(self.screen, color_of_line, pt, 3, width=5)
-
-    # issue: board needs a margin. the point which is part of the curve at the boundary leaks out
 
     def connected(self):
         """ This function is not used anywhere. """
