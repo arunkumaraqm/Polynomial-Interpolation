@@ -1,9 +1,9 @@
 import numpy as np
 import math
 from math import factorial
-import pygame
 import functools
 
+# import matplotlib.pyplot as plt
 
 # prolly wise to memoize
 def nCk(n, k):
@@ -64,12 +64,81 @@ class NumericalMethods:
 
         # calculating a 100 output points for the bezier curve
         out_pts = []
-        for u in np.linspace(0, 1, 100):
+        for u in np.linspace(0, 1, 1000):
             out_pts.append(P(u))
         return out_pts
 
+    # @classmethod
+    # def cardinal(cls, pts): # just an offset lagrange now
+    #     mylist = cls.lagrange(pts)
+    #     mylist = [(x, y - 15) for x, y in mylist]
+    #     return mylist
+
     @classmethod
-    def hermite(cls, pts): # just an offset lagrange now
-        mylist = cls.lagrange(pts)
-        mylist = [(x, y - 15) for x, y in mylist]
-        return mylist
+    def cardinal(cls, pts): # just an offset lagrange now
+        if len(pts) < 4:
+            raise ValueError('Insufficient points for Cardinal spline.')
+
+        t = 0 # this Cardinal spline is an Overhauser spline
+        s = (1 - t) / 2
+
+        cardinal_matrix = np.array([
+            [-s,        2 - s,          s - 2,      s],
+            [2 * s,     s - 3,      3 - 2 * s,      -s],
+            [-s,            0,              s,      0],
+            [0,             1,              0,      0]
+        ])
+
+        def P(iu, out_pts):
+            pos_u, u = iu
+            ret = np.array([u**3, u**2, u, 1]).reshape([1, 4])
+            ret = np.matmul(ret, cardinal_matrix)
+
+            modified_pts = pts[-1:] + pts + pts[:2]
+            for k in range(len(pts)):
+                four_pts = np.array([
+                    modified_pts[k], # p_k-1
+                    modified_pts[k + 1], # p_k
+                    modified_pts[k + 2], #p_k+1
+                    modified_pts[k + 3], #p_k+2
+                ]).reshape([4, 2])
+                out_pts[k,pos_u,:] = np.matmul(ret, four_pts)
+
+        nf_pieces_per_pair = 100
+        out_pts = np.zeros([len(pts), nf_pieces_per_pair, 2])
+        for i, u in enumerate(np.linspace(0, 1, nf_pieces_per_pair)): P((i, u), out_pts)
+
+        out_pts = out_pts.reshape(len(pts) * nf_pieces_per_pair, 2)
+        # plt.scatter(out_pts[:,0], out_pts[:, 1], color='blue')
+        # pts = np.array(pts)
+        # plt.scatter(pts[:,0], pts[:, 1], color='red')
+        # plt.show()
+
+        return out_pts
+
+if __name__ == '__main__':
+
+    ## figure 16
+    # NumericalMethods.cardinal([
+    #     [0, 0],
+    #     [3, 6],
+    #     [7, 6],
+    #     [10, 0],
+    # ])
+
+    ## figure 17
+    # NumericalMethods.cardinal([
+    #     [0, 0],
+    #     [5, 6],
+    #     [5, 6],
+    #     [10, 0],
+    # ])
+
+    ## figure 18
+    # NumericalMethods.cardinal([
+    #     [0, 0],
+    #     [4.9, 6],
+    #     [5.1, 6],
+    #     [10, 0],
+    # ])
+    pass

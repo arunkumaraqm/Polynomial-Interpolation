@@ -25,7 +25,7 @@ colors.update({
 })
 
 # mode names and point and line colours
-ALL_MODES = ['lagrange', 'bezier', 'hermite']
+ALL_MODES = ['lagrange', 'bezier', 'cardinal']
 
 # window details
 WINDOW_TITLE = "Computer Graphics Project"
@@ -47,14 +47,14 @@ MODE_LINE_COLOR_MAP = {
 	'connected':		colors['raspberry'],
 	'lagrange': 		colors['yellow'],
 	'bezier':			colors['green_yellow'],
-	'hermite':			colors['mauve'],
+	'cardinal':			colors['mauve'],
 } # given mode, what should be the colour of the curve?
 
 CONTROL_GRAPH_REQUIRED = {
 	'connected':	False,
 	'lagrange':		False,
 	'bezier':		True,
-	'hermite':		True,
+	'cardinal':		True,
 }
 MODES_NEEDING_CONTROL_GRAPH = set(key for key, value in CONTROL_GRAPH_REQUIRED.items() if value is True)
 
@@ -77,14 +77,14 @@ MODE_BUTTON_TEXT_COLOR_MAP = {
 	'connected': 		colors['sap_green'],
 	'lagrange': 		colors['red'],
 	'bezier':			colors['medium_red_violet'],
-	'hermite':			colors['honolulu_blue'],
+	'cardinal':			colors['honolulu_blue'],
 }
 # text color changes on hover
 MODE_BUTTON_HOVER_TEXT_COLOR_MAP = {
 	'connected':		colors['raspberry'],
 	'lagrange': 		colors['yellow'],
 	'bezier':			colors['green_yellow'],
-	'hermite':			colors['mauve'],
+	'cardinal':			colors['mauve'],
 }
 
 # button bg color changes on hover
@@ -92,7 +92,7 @@ MODE_BUTTON_HOVER_BG_COLOR_MAP = {
 	'connected': 		colors['sap_green'],
 	'lagrange': 		colors['red'],
 	'bezier':			colors['medium_red_violet'],
-	'hermite':			colors['honolulu_blue'],
+	'cardinal':			colors['honolulu_blue'],
 }
 
 MODE_BUTTON_BG_COLOR_MAP = MODE_LINE_COLOR_MAP # given mode, what should be the background colour of this mode's button?
