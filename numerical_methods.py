@@ -68,14 +68,8 @@ class NumericalMethods:
             out_pts.append(P(u))
         return out_pts
 
-    # @classmethod
-    # def cardinal(cls, pts): # just an offset lagrange now
-    #     mylist = cls.lagrange(pts)
-    #     mylist = [(x, y - 15) for x, y in mylist]
-    #     return mylist
-
     @classmethod
-    def cardinal(cls, pts): # just an offset lagrange now
+    def cardinal(cls, pts): 
         if len(pts) < 4:
             raise ValueError('Insufficient points for Cardinal spline.')
 
