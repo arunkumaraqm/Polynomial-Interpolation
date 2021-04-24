@@ -44,7 +44,7 @@ class NumericalMethods:
             xmin = min(pts, key=lambda pt: pt[0])[0]
             xmax = max(pts, key=lambda pt: pt[0])[0]
 
-            return [(xi, L(xi)) for xi in np.arange(xmin, xmax + 1, 0.1)]
+            return [(xi, L(xi)) for xi in np.arange(xmin, xmax + 1, 0.01)]
         else:
             return []
 
@@ -62,7 +62,7 @@ class NumericalMethods:
                 summ += prod
             return summ
 
-        # calculating a 100 output points for the bezier curve
+        # calculating a 1000 output points for the bezier curve
         out_pts = []
         for u in np.linspace(0, 1, 1000):
             out_pts.append(P(u))
