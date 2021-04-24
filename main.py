@@ -33,7 +33,7 @@ class MyGame:
         # self.MODE_INDICATOR_TEXT_FONT = game.font.SysFont(*MODE_INDICATOR_TEXT_FONT_TUPLE)
 
         self.mode_buttons = defaultdict(dict)
-        self.mode_indicators = defaultdict(dict)
+        # self.mode_indicators = defaultdict(dict)
         self.create_restart_button()
         self.create_mode_buttons()
         # self.create_mode_indicators()
@@ -65,7 +65,7 @@ class MyGame:
 
             # drawing buttons
             self.draw_button(self.restart_button)
-            self.create_mode_buttons()
+            # self.create_mode_buttons()
             for mode in ALL_MODES:
                 self.draw_button(self.mode_buttons[mode])
                 # self.draw_button(self.mode_indicators[mode])
@@ -93,12 +93,13 @@ class MyGame:
 
                 # mode buttons' hover changes
                 for mode in ALL_MODES:
+                    cur_font = self.MODE_TEXT_FONT if mode in self.modes else self.MODE_OFF_TEXT_FONT
                     if self.mode_buttons[mode]['button_rect'].collidepoint(event.pos):
                         self.mode_buttons[mode]['color'] = MODE_BUTTON_HOVER_BG_COLOR_MAP[mode]
-                        self.mode_buttons[mode]['text'] = self.MODE_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_HOVER_TEXT_COLOR_MAP[mode])
+                        self.mode_buttons[mode]['text'] = cur_font.render(mode.upper(), True, MODE_BUTTON_HOVER_TEXT_COLOR_MAP[mode])
                     else:
                         self.mode_buttons[mode]['color'] = MODE_BUTTON_BG_COLOR_MAP[mode]
-                        self.mode_buttons[mode]['text'] = self.MODE_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
+                        self.mode_buttons[mode]['text'] = cur_font.render(mode.upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
 
 
             # when the mouse is clicked but not released
@@ -118,10 +119,19 @@ class MyGame:
                 else:
                     for mode in ALL_MODES:
                         if self.mode_buttons[mode]['button_rect'].collidepoint(event.pos):
+                            # self.mode_buttons[mode]['color'] = MODE_BUTTON_HOVER_BG_COLOR_MAP[mode]
                             if mode in self.modes:
                                 self.modes.discard(mode)
+                                self.mode_buttons[mode]['text'] = self.MODE_OFF_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
                             else:
                                 self.modes.add(mode)
+                                self.mode_buttons[mode]['text'] = self.MODE_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
+
+            # else:
+            #     for mode in ALL_MODES:
+            #         if self.mode_buttons[mode]['button_rect'].collidepoint(game.mouse.get_pos()):
+            #             print(555)
+            #             self.mode_buttons[mode]['color'] = MODE_BUTTON_BG_COLOR_MAP[mode]
 
     def draw_board(self):
         # Draws the board itself without filling in anything
@@ -242,7 +252,7 @@ class MyGame:
             center = ((2 * i + 1) * (WINDOW_WIDTH // (2 * len(ALL_MODES))), MODE_TEXT_Y)
             margin = BUTTON_MARGIN
 
-            buttonfont = self.MODE_TEXT_FONT if mode in self.modes else self.MODE_OFF_TEXT_FONT
+            buttonfont = self.MODE_TEXT_FONT #if mode in self.modes else self.MODE_OFF_TEXT_FONT
             text = buttonfont.render(
                 mode.upper(),
                 True, 
@@ -263,28 +273,6 @@ class MyGame:
                 'button_rect': my_button_rect,
                 'color': button_color
             }
-    # def create_mode_indicators(self):
-    #     for i, mode in enumerate(ALL_MODES):
-    #         button_color = MODE_INDICATOR_COLOR
-    #         center = ((2 * i + 1) * (WINDOW_WIDTH // (2 * len(ALL_MODES))), MODE_TEXT_Y - 30)
-    #         margin = 1
-
-    #         text = self.MODE_INDICATOR_TEXT_FONT.render("on".upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
-    #         text_rect = text.get_rect(center=center)
-
-    #         my_button_rect = game.Rect(
-    #             text_rect.x - margin,
-    #             text_rect.y - margin,
-    #             text_rect.width + 2 * margin,
-    #             text_rect.height + 2 * margin,
-    #         )
-
-    #         self.mode_indicators[mode] = {
-    #             'text': text,
-    #             'text_rect': text_rect,
-    #             'button_rect': my_button_rect,
-    #             'color': button_color
-    #         }
 
     def draw_button(self, given_button):
         game.draw.rect(
