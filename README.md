@@ -5,8 +5,7 @@ To the Layman: Draws Curves Connecting Points
 
 For more information, view the [PPT](https://drive.google.com/file/d/1LRz3J5BvzcarbiMoxut9mob0YJA42bVl/view?usp=sharing).
 
-## Demonstration Video
-<iframe src="https://drive.google.com/file/d/1iXWsMlv_aQoM_pfPLC17QLTZ9irUa487/preview" width="640" height="480" allowfullscreen></iframe>
+## [Demonstration Video](https://drive.google.com/file/d/1iXWsMlv_aQoM_pfPLC17QLTZ9irUa487/preview)
 
 ## Screenshots
 
