@@ -128,11 +128,6 @@ class MyGame:
                                 self.modes.add(mode)
                                 self.mode_buttons[mode]['text'] = self.MODE_TEXT_FONT.render(mode.upper(), True, MODE_BUTTON_TEXT_COLOR_MAP[mode])
 
-            # else:
-            #     for mode in ALL_MODES:
-            #         if self.mode_buttons[mode]['button_rect'].collidepoint(game.mouse.get_pos()):
-            #             print(555)
-            #             self.mode_buttons[mode]['color'] = MODE_BUTTON_BG_COLOR_MAP[mode]
 
     def draw_board(self):
         # Draws the board itself without filling in anything
