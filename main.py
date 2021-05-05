@@ -9,14 +9,15 @@ from numerical_methods import NumericalMethods
 
 
 class MyGame:
-    def __init__(self):
+    def __init__(self, given_modes=None):
         game.init()
         self.screen = game.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         game.display.set_caption(WINDOW_TITLE)
         self.screen.fill(WINDOW_BG_COLOR)
         self.clock = game.time.Clock()
 
-        self.modes = set(['bezier'])
+        if given_modes is None: self.modes = set(['bezier'])
+        else: self.modes = given_modes
         self.something_happened = True
 
         # important state variables
@@ -243,7 +244,7 @@ class MyGame:
             'text_rect': text_rect,
             'button_rect': my_button_rect,
             'color': button_color,
-            'callback': self.__init__
+            'callback': lambda: self.__init__(self.modes)
         }
 
     def create_mode_buttons(self):
